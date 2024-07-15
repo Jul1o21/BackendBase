@@ -18,9 +18,26 @@ from src.services.POST.postObtenerUbigeosEst import postObtenerUbigeosEst
 from src.services.GET.getObtenerDepartamentos import getObtenerDepartamentos
 from src.services.GET.getTest import getTests
 from src.services.GET.getObtenerTestsEvaluables import getObtenerTestsEvaluables
+from flask import current_app
 
 main = Blueprint('index_blueprint', __name__)
 
+
+@main.route("/mqtt", methods=['GET'])
+def get_mqtt_message():
+    try:
+        message = None
+        if not current_app.config['MQTT_MESSAGE_QUEUE'].empty():
+            message = current_app.config['MQTT_MESSAGE_QUEUE'].get()
+        if message == "EMPTY":
+            print("ENVIANDO MQTT: No hay mensajes detectados")
+        else:
+            print("ENVIANDO MQTT:", message)
+        return jsonify({'message': message or "No new messages", 'success': True})
+    except Exception as e:
+        return jsonify({'message': 'ERROR', 'success': False})
+      
+      
 @main.route("/login", methods = ['POST'])
 def login():
   try:
